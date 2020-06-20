@@ -5,9 +5,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
@@ -86,5 +90,19 @@ public class RestaurantServiceTest {
         Restaurant created = restaurantService.addRestaurant(restaurant);
 
         assertThat(created.getId(), is(1234L));
+    }
+
+    @Test
+    public void updateRestaurant() {
+
+        Restaurant restaurant = new Restaurant(1004L, "Bob zip","Seoul");
+
+        given(restaurantRepository.findById(1004L))
+                .willReturn(Optional.of(restaurant));
+
+        restaurantService.updateRestaurant(1004L, "Sool zip","Busan");
+
+        assertThat(restaurant.getName(), is("Sool zip"));
+        assertThat(restaurant.getAddress(), is("Busan"));
     }
 }

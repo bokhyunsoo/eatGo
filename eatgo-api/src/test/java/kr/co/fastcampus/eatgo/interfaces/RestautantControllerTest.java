@@ -19,8 +19,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -69,10 +68,10 @@ public class RestautantControllerTest {
                 .andExpect(content().string(containsString("JOKER House")))
                 .andExpect(content().string(containsString("kimchi")));
 
-        mvc.perform(get("/restaurants/1004"))
+        mvc.perform(get("/restaurants/2020"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("1004")))
-                .andExpect(content().string(containsString("JOKER House")))
+                .andExpect(content().string(containsString("2020")))
+                .andExpect(content().string(containsString("Cyber Food")))
                 .andExpect(content().string(containsString("Seoul")));
 
 
@@ -88,9 +87,19 @@ public class RestautantControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Beryong\",\"address\":\"Busan\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("location","/restaurants/1234"))
+                .andExpect(header().string("location","/restaurants/1"))
                 .andExpect(content().string("{}"));
 
         verify(restaurantService).addRestaurant(any());
+    }
+
+    @Test
+    public void update() throws Exception {
+        mvc.perform(patch("restaurants/1234")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("{\"name\":\"JOKER Bar\",\"address\":\"Busan\"}"))
+                .andExpect(status().isOk());
+
+        verify(restaurantService).updateRestaurant(1234L, "JOKER Bar", "Busan");
     }
 }
