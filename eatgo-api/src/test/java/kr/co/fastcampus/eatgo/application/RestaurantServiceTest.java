@@ -43,14 +43,20 @@ public class RestaurantServiceTest {
 
     private void mockMenuItemRepository() {
         List<MenuItem> menuItems = new ArrayList<>();
-        menuItems.add(new MenuItem("kimchi"));
+        menuItems.add(MenuItem.builder()
+                .name("kimchi")
+                .build());
 
         given(menuItemRepository.findAllByRestaurantId(1004L)).willReturn(menuItems);
     }
 
     private void mockRestaurantRepository() {
         List<Restaurant> restaurants = new ArrayList<>();
-        Restaurant restaurant = new Restaurant(1004L,"Bob zip","Seoul");
+        Restaurant restaurant = Restaurant.builder()
+                .id(1004L)
+                .address("Seoul")
+                .name("Bob zip")
+                .build();
         restaurants.add(restaurant);
 
         given(restaurantRepository.findAll()).willReturn(restaurants);
@@ -81,11 +87,23 @@ public class RestaurantServiceTest {
 
     @Test
     public void addRestaurant() {
+        given(restaurantRepository.save(any())).will(invocation -> {
+            Restaurant restaurant = invocation.getArgument(0);
+            restaurant.setId(1234L);
+            return restaurant;
+        });
 
-        Restaurant restaurant = new Restaurant("BeRyong", "Busan");
-        Restaurant saved = new Restaurant(1234L,"BeRyong","Busan");
+        Restaurant restaurant = Restaurant.builder()
+                .name("BeRyong")
+                .address("Busan")
+                .build();
 
-        given(restaurantRepository.save(any())).willReturn(saved);
+//        Restaurant saved = Restaurant.builder()
+//                .id(1234L)
+//                .name("BeRyong")
+//                .address("Busan")
+//                .build();
+
 
         Restaurant created = restaurantService.addRestaurant(restaurant);
 
@@ -95,7 +113,11 @@ public class RestaurantServiceTest {
     @Test
     public void updateRestaurant() {
 
-        Restaurant restaurant = new Restaurant(1004L, "Bob zip","Seoul");
+        Restaurant restaurant = Restaurant.builder()
+                .id(1004L)
+                .name("Bob zip")
+                .address("Seoul")
+                .build();
 
         given(restaurantRepository.findById(1004L))
                 .willReturn(Optional.of(restaurant));

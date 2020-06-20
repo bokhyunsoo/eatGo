@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.StringContains.containsString;
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(RestaurantController.class)
-public class RestautantControllerTest {
+public class RestaurantControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -41,7 +42,11 @@ public class RestautantControllerTest {
     @Test
     public void list() throws Exception {
         List<Restaurant> restaurants = new ArrayList<>();
-        restaurants.add(new Restaurant(1004L,"JOKER House","Seoul"));
+        restaurants.add(Restaurant.builder()
+                .id(1004L)
+                .name("JOKER House")
+                .address("Seoul")
+                .build());
 
         given(restaurantService.getRestaurants()).willReturn(restaurants);
 
@@ -54,10 +59,22 @@ public class RestautantControllerTest {
 
     @Test
     public void detail() throws Exception {
-        Restaurant restaurant1 = new Restaurant(1004L,"JOKER House","Seoul");
-        restaurant1.addMenuItem(new MenuItem("kimchi"));
+        Restaurant restaurant1 = Restaurant.builder()
+                .id(1004L)
+                .name("JOKER House")
+                .address("Seoul")
+                .build();
+        MenuItem menuItem = MenuItem.builder()
+                .name("kimchi")
+                .build();
+        //restaurant1.addMenuItem(new MenuItem("kimchi"));
+        restaurant1.setMenuItems(Arrays.asList(menuItem));
 
-        Restaurant restaurant2 = new Restaurant(2020L,"Cyber Food","Seoul");
+        Restaurant restaurant2 = Restaurant.builder()
+                .id(2020L)
+                .name("Cyber Food")
+                .address("Seoul")
+                .build();
 
         given(restaurantService.getRestaurant(1004L)).willReturn(restaurant1);
         given(restaurantService.getRestaurant(2020L)).willReturn(restaurant2);
@@ -79,7 +96,14 @@ public class RestautantControllerTest {
 
     @Test
     public void create() throws Exception {
-
+        given(restaurantService.addRestaurant(any())).will(invocation -> {
+            Restaurant restaurant = invocation.getArgument(0);
+            return Restaurant.builder()
+                    .id(1234L)
+                    .name(restaurant.getName())
+                    .address(restaurant.getAddress())
+                    .build();
+        });
         //Restaurant restaurant = new Restaurant(1234L, "Beryong","Seoul");
         //restaurantService.addRestaurant(restaurant);
 
@@ -87,7 +111,7 @@ public class RestautantControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"name\":\"Beryong\",\"address\":\"Busan\"}"))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("location","/restaurants/1"))
+                .andExpect(header().string("location","/restaurants/1234"))
                 .andExpect(content().string("{}"));
 
         verify(restaurantService).addRestaurant(any());
